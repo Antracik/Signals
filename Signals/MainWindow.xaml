@@ -1,0 +1,116 @@
+﻿<Window x:Class="Signals.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Signals"
+        xmlns:ScottPlot="clr-namespace:ScottPlot;assembly=ScottPlot.WPF"
+        Loaded="OnLoaded"
+        mc:Ignorable="d"
+        Name="Root"
+        Title="Signals"
+        Height="800" 
+        Width="1200" 
+        WindowStyle="SingleBorderWindow" 
+        WindowStartupLocation="CenterScreen">
+    <Border Margin="5">
+        <Grid>
+            <!--Grid Column Definitions-->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+            <!--End Grid Column Definitions-->
+
+            <!-- Main Plot -->
+            <ScottPlot:WpfPlot Grid.Column="0" Name="SinePlot" >
+                <ScottPlot:WpfPlot.ContextMenu>
+                    <ContextMenu Opened="PlotMenu_OnOpened"/>
+                </ScottPlot:WpfPlot.ContextMenu>
+            </ScottPlot:WpfPlot>
+            <!-- End Main Plot -->
+
+            <StackPanel Margin="5" Grid.Column="1">
+                <Grid>
+                    
+                    <!-- Grid Row Definitions -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <!-- End Grid Row Definitions -->
+
+                    <!-- Sliders -->
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="Oscillation"/>
+                        <DockPanel>
+                            <TextBox DockPanel.Dock="Right" Margin="10,0,0,0" Width="50" IsReadOnly="True" Text="{Binding ElementName=OscSlider, Path=Value, StringFormat=N4}"/>
+                            <Slider Name="OscSlider" 
+                                    IsSnapToTickEnabled="True" Value="1" TickFrequency=".0001" Minimum="-10"
+                                    Maximum="10" Orientation="Horizontal" />
+                        </DockPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1">
+                        <TextBlock Text="Offset"/>
+                        <DockPanel>
+                            <TextBox DockPanel.Dock="Right" Margin="10,0,0,0" Width="50" IsReadOnly="True" Text="{Binding ElementName=OffSlider, Path=Value, StringFormat=N4}" />
+                            <Slider Name="OffSlider" 
+                                IsSnapToTickEnabled="True" TickFrequency=".0001" Minimum="-10"
+                                Maximum="10" />
+                        </DockPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2">
+                        <TextBlock Text="Multiply"/>
+                        <DockPanel>
+                            <TextBox DockPanel.Dock="Right" Margin="10,0,0,0" Width="50" IsReadOnly="True" Text="{Binding ElementName=MulSlider, Path=Value, StringFormat=N4}"  />
+                            <Slider Name="MulSlider" 
+                                IsSnapToTickEnabled="True" Value="1" TickFrequency=".0001" Minimum="-10"
+                                Maximum="10" />
+                        </DockPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Row="3">
+                        <TextBlock Text="Phase"/>
+                        <DockPanel>
+                            <TextBox DockPanel.Dock="Right" Margin="10,0,0,0" Width="50" IsReadOnly="True" Text="{Binding ElementName=PhaseSlider, Path=Value, StringFormat=N4}"></TextBox>
+                            <Slider Name="PhaseSlider"
+                                IsSnapToTickEnabled="True" TickFrequency=".0001" Minimum="-10"
+                                Maximum="10" />
+                        </DockPanel>
+                    </StackPanel>
+                    <!-- End Sliders -->
+
+                    <!-- Plots Grid -->
+                    <StackPanel Margin="0,10,0,0" Grid.Row="4">
+                        <DataGrid Name="PlotDataGrid" 
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  CanUserSortColumns="False"
+                                  CanUserReorderColumns="False"
+                                  CanUserResizeColumns="False"
+                                  CanUserResizeRows="False"
+                                  ColumnWidth="*">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn  Binding="{Binding Path=Name, Mode=OneWay}" Header="Plot Name"/>
+                                <DataGridTextColumn Binding="{Binding Path=PointCount, Mode=OneWay}" Header="Point Count"/>
+                                <DataGridCheckBoxColumn Binding="{Binding Path=Visible, Mode=TwoWay}" Header="Visible">
+                                    <DataGridCheckBoxColumn.CellStyle>
+                                        <Style>
+                                            <EventSetter Event="CheckBox.Unchecked" Handler="Visible_Unchecked"/>
+                                            <EventSetter Event="CheckBox.Checked" Handler="Visible_Checked"/>
+                                        </Style>
+                                    </DataGridCheckBoxColumn.CellStyle>
+                                </DataGridCheckBoxColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                    <!--End Plot Grid-->
+
+                </Grid>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

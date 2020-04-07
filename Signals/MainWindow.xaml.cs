@@ -11,10 +11,12 @@ using MathNet.Numerics;
 using ScottPlot;
 using Signals.Models;
 using MathNet.Numerics.IntegralTransforms;
+using static Signals.Utility;
 using static ScottPlot.DataGen;
 using Color = System.Drawing.Color;
 using Window = System.Windows.Window;
-
+using System.Numerics;
+#pragma warning disable CS0618 
 namespace Signals
 {
     /// <summary>
@@ -24,9 +26,9 @@ namespace Signals
     {
         #region Private values
 
-        private bool valueChanging = false;
-        private const int pointCount = 100;
-        private PlottableScatter _plt;
+        private const int pointCount = 250;
+        private const int sampleRate = 500;
+        private Point mousePosition;
         private PlottableVLine _plottedLine1;
         private PlottableVLine _plottedLine2;
         private PlottableHSpan _plottedSpan;
@@ -51,33 +53,35 @@ namespace Signals
             foreach (var plotModel in this.plots)
             {
                 var plot = plotModel.Plot;
-                SinePlot.plt.PlotScatter(plot.xs, plot.ys, plot.color, plot.lineWidth, plot.markerSize, plot.label,
-                    plot.errorX, plot.errorY, plot.errorLineWidth, plot.errorCapSize, plot.markerShape, plot.lineStyle);
+                SinePlot.plt.PlotSignal(plot.ys, plot.sampleRate);
             }
             InitializePlot(true);
         }
 
         private void InitializePlot(bool skipDemoSineWave = false)
         {
-            double[] sineWave = Array.Empty<double>();
-            double[] consecutive = Array.Empty<double>();
             if (!skipDemoSineWave)
             {
-                sineWave = Sin(pointCount);
-                consecutive = Consecutive(pointCount);
-                var temp = GenerateRandomScatterPoints().ToList();
-                //for (int i = 0; i < temp.Count; i++)
-                //{
-                //    plots.Add(new PlotModel { Plot = SinePlot.plt.PlotScatter(temp[i].xs, temp[i].ys, markerShape: MarkerShape.filledCircle, label: $"Wave{i + 1}"), Visible = true });
-                //}
+                var waveList = new List<(double[] ys,int frequency,int amplitude,int phase)>();
+
+                int waveCount = 3;
+
+                for (int i = 0; i < waveCount; i++)
+                {
+                    var temp = GenerateSinusoidal(pointCount, sampleRate);
+                    waveList.Add(temp);
+                }
+
+                waveList = waveList.OrderBy(x => x.frequency).ToList();
+
+                for (int i = 0; i < waveCount; i++)
+                {
+                    plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(waveList[i].ys, sampleRate, label: $"Inner Wave{i}"), Amplitude = waveList[i].amplitude, Frequency = waveList[i].frequency, Phase = waveList[i].phase });
+                }
+
+                var combined = CombineSinusodial(waveList.Select(x => x.ys));
+                plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(combined, sampleRate, label: "ExampleSignal") });
             }
-            else
-            {
-                sineWave = Sin(pointCount);
-                consecutive = Consecutive(pointCount);
-            }
-            _plt = SinePlot.plt.PlotScatter(consecutive, sineWave, markerShape: MarkerShape.filledCircle, label: "DemoPlot");
-            plots.Add(new PlotModel { Plot = _plt, Visible = _plt.visible });
 
             #region SetupPlot
             _line = new MenuItem();
@@ -95,6 +99,8 @@ namespace Signals
             _openWindow.Click += MenuItemOpenSelection_Click;
 
             SinePlot.plt.Title("Signals");
+            SinePlot.plt.XLabel("Time (s)");
+            SinePlot.plt.YLabel("Amplitude");
             _clearLines.Header = "Clear Selection";
             _openWindow.Header = "Open Selection in new window";
 
@@ -110,27 +116,11 @@ namespace Signals
             SinePlot.Render();
         }
 
-        private void Slider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (!valueChanging)
-            {
-                valueChanging = true;
-                _plt.ys = Generate.Sinusoidal(pointCount, pointCount, OscSlider.Value, MulSlider.Value, phase: PhaseSlider.Value, mean: OffSlider.Value);
-                //_plt.ys = Sin(_plt.ys.Length, OscSlider.Value, OffSlider.Value, MulSlider.Value,
-                //    PhaseSlider.Value);
-                _plottedLine1.visible = _plottedLine2.visible = _plottedSpan.visible = false;
-                SinePlot.Render();
-                valueChanging = false;
-            }
-        }
-        
+        #region Event Handlers
+
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             PlotDataGrid.ItemsSource = plots;
-            OscSlider.ValueChanged += Slider_OnValueChanged;
-            OffSlider.ValueChanged += Slider_OnValueChanged;
-            MulSlider.ValueChanged += Slider_OnValueChanged;
-            PhaseSlider.ValueChanged += Slider_OnValueChanged;
         }
 
         private void MenuItemClearSelect_Click(object sender, RoutedEventArgs e)
@@ -141,23 +131,23 @@ namespace Signals
 
         private void MenuItemOpenSelection_Click(object sender, RoutedEventArgs e)
         {
-            int maxPoint = (int)Math.Max(_plottedLine1.position, _plottedLine2.position);
-            int minPoint = (int)Math.Min(_plottedLine1.position, _plottedLine2.position);
+            var maxPoint = Math.Max(_plottedLine1.position, _plottedLine2.position);
+            var minPoint = Math.Min(_plottedLine1.position, _plottedLine2.position);
 
             ObservableCollection<PlotModel> newCollection = new ObservableCollection<PlotModel>();
             foreach (var plotModel in plots)
             {
                 if (plotModel.Visible)
                 {
-                    var ys = plotModel.Plot.ys.Skip(minPoint).Take(maxPoint - minPoint).ToArray();
-                    var xs = plotModel.Plot.xs.Skip(minPoint).Take(maxPoint - minPoint).ToArray();
-                    if (ys.Length > 0 && xs.Length > 0)
+                    var plot = plotModel.Plot;
+                    var xs = DataGen.Consecutive(plot.GetPointCount(), plot.samplePeriod);
+                    int indexMax = (int)(xs.First(x => x.AlmostEqual(maxPoint)) * plot.sampleRate);
+                    int indexMin = (int)(xs.First(x => x.AlmostEqual(minPoint)) * plot.sampleRate);
+                    var ys = plot.ys.Skip(indexMin).Take(indexMax - indexMin).ToArray();
+                    if (ys.Length > 0)
                     {
-                        var plot = plotModel.Plot;
-                        var temp = new PlottableScatter(xs, ys, plot.color, plot.lineWidth, plot.markerSize, plot.label,
-                            plot.errorX, plot.errorY, plot.errorLineWidth, plot.errorCapSize, plot.stepDisplay,
-                            plot.markerShape, plot.lineStyle);
-                        newCollection.Add(new PlotModel {Plot = temp, Visible = true});
+                        var temp = new PlottableSignal(ys, plot.sampleRate, plot.xOffset, plot.yOffset, plot.color, plot.lineWidth, plot.markerSize, plot.label, plot.useParallel, null, ys.Length - 1);
+                        newCollection.Add(new PlotModel { Plot = temp, Visible = true });
                     }
                 }
             }
@@ -168,13 +158,15 @@ namespace Signals
 
         private void MenuItemSelect_Click(object sender, RoutedEventArgs e)
         {
-            var mouseLoc = SinePlot.mouseCoordinates;
-
             List<(int index, double value)> closestValues = new List<(int index, double value)>();
             foreach (var plotModel in plots)
             {
                 if (plotModel.Visible)
-                    closestValues.Add(FindClosestXIndex(plotModel.Plot.xs, mouseLoc.X));
+                {
+                    var tempPlt = plotModel.Plot;
+                    var xs = DataGen.Consecutive(tempPlt.GetPointCount(), tempPlt.samplePeriod);
+                    closestValues.Add(FindClosestXIndex(xs, mousePosition.X));
+                }
             }
 
             if (closestValues.Any())
@@ -205,6 +197,8 @@ namespace Signals
 
         private void PlotMenu_OnOpened(object sender, RoutedEventArgs e)
         {
+            mousePosition = SinePlot.mouseCoordinates;
+
             _line.Header = _plottedLine1.visible
                 ? "Select to here..."
                 : "Select from here...";
@@ -228,7 +222,7 @@ namespace Signals
             if (selectedItem != null)
             {
                 selectedItem.Visible = false;
-                SinePlot.plt.GetPlottables().Find(x => x.label == selectedItem.Name).visible = false;
+                SinePlot.plt.GetPlottables().Find(x => x.GetLegendItems()[0].label == selectedItem.Name).visible = false;
                 SinePlot.Render();
             }
         }
@@ -239,84 +233,19 @@ namespace Signals
             if (selectedItem != null)
             {
                 selectedItem.Visible = true;
-                SinePlot.plt.GetPlottables().Find(x => x.label == selectedItem.Name).visible = true;
+                SinePlot.plt.GetPlottables().Find(x => x.GetLegendItems()[0].label == selectedItem.Name).visible = true;
                 SinePlot.Render();
             }
         }
-
-        #region Utility
-        private IEnumerable<(double[] xs, double[] ys)> GenerateRandomScatterPoints()
+        private void DataGridMenuItemFFT_Clicked(object sender, RoutedEventArgs e)
         {
-            Random rand = new Random();
-            List<(double[] xs, double[] ys)> list = new List<(double[] xs, double[] ys)>();
-            for (int i = 0; i < 3; i++)
-            {
-                int randomCount = rand.Next(100, 1000);
-                var xs = Consecutive(randomCount);
-                var ys = Sin(randomCount, rand.Next(1, 3));
+            var test = (PlotModel)PlotDataGrid.SelectedItem;
+            if (test == null)
+                return;
 
-                list.Add((xs, ys));
-            }
-
-            return list;
+            var FFTWindow = new FFTAnalysis(test.Plot);
+            FFTWindow.Show();
         }
-        private (int index, double value) FindClosestXIndex(double[] arr, double target)
-        {
-            int n = arr.Length;
-
-            if (target <= arr[0])
-                return (0, arr[0]);
-            if (target >= arr[n - 1])
-                return (n - 1, arr[n - 1]);
-
-            int i = 0, j = n, mid = 0;
-            while (i < j)
-            {
-                mid = (i + j) / 2;
-
-                if (Math.Abs(arr[mid] - target) < 0.000000001)
-                    return (mid, arr[mid]);
-
-                double temp;
-                if (target < arr[mid])
-                {
-                    if (mid > 0 && target > arr[mid - 1])
-                    {
-                        temp = GetClosest(arr[mid - 1], arr[mid], target);
-                        if (Math.Abs(temp - arr[mid - 1]) < 0.000000001)
-                            return (mid - 1, arr[mid - 1]);
-                        else
-                            return (mid, arr[mid]);
-                    }
-
-                    j = mid;
-                }
-
-                else
-                {
-                    if (mid < n - 1 && target < arr[mid + 1])
-                    {
-                        temp = GetClosest(arr[mid], arr[mid + 1], target);
-                        if (Math.Abs(temp - arr[mid]) < 0.000000001)
-                            return (mid, arr[mid]);
-                        else
-                            return (mid + 1, arr[mid + 1]);
-                    }
-                    i = mid + 1;
-                }
-            }
-
-            return (mid, arr[mid]);
-        }
-
-        private double GetClosest(double val1, double val2, double target)
-        {
-            if (target - val1 >= val2 - target)
-                return val2;
-
-            return val1;
-        }
-
 
         #endregion
     }

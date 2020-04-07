@@ -18,7 +18,7 @@
             <!--Grid Column Definitions-->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
             <!--End Grid Column Definitions-->
 
@@ -32,70 +32,40 @@
 
             <StackPanel Margin="5" Grid.Column="1">
                 <Grid>
-                    
+
                     <!-- Grid Row Definitions -->
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <!-- End Grid Row Definitions -->
-
-                    <!-- Sliders -->
-                    <StackPanel Grid.Row="0">
-                        <TextBlock Text="Oscillation"/>
-                        <DockPanel>
-                            <TextBox DockPanel.Dock="Right" Margin="10,0,0,0" Width="50" IsReadOnly="True" Text="{Binding ElementName=OscSlider, Path=Value, StringFormat=N4}"/>
-                            <Slider Name="OscSlider" 
-                                    IsSnapToTickEnabled="True" Value="1" TickFrequency=".0001" Minimum="-10"
-                                    Maximum="10" Orientation="Horizontal" />
-                        </DockPanel>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1">
-                        <TextBlock Text="Offset"/>
-                        <DockPanel>
-                            <TextBox DockPanel.Dock="Right" Margin="10,0,0,0" Width="50" IsReadOnly="True" Text="{Binding ElementName=OffSlider, Path=Value, StringFormat=N4}" />
-                            <Slider Name="OffSlider" 
-                                IsSnapToTickEnabled="True" TickFrequency=".0001" Minimum="-10"
-                                Maximum="10" />
-                        </DockPanel>
-                    </StackPanel>
-                    <StackPanel Grid.Row="2">
-                        <TextBlock Text="Multiply"/>
-                        <DockPanel>
-                            <TextBox DockPanel.Dock="Right" Margin="10,0,0,0" Width="50" IsReadOnly="True" Text="{Binding ElementName=MulSlider, Path=Value, StringFormat=N4}"  />
-                            <Slider Name="MulSlider" 
-                                IsSnapToTickEnabled="True" Value="1" TickFrequency=".0001" Minimum="-10"
-                                Maximum="10" />
-                        </DockPanel>
-                    </StackPanel>
-                    <StackPanel Grid.Row="3">
-                        <TextBlock Text="Phase"/>
-                        <DockPanel>
-                            <TextBox DockPanel.Dock="Right" Margin="10,0,0,0" Width="50" IsReadOnly="True" Text="{Binding ElementName=PhaseSlider, Path=Value, StringFormat=N4}"></TextBox>
-                            <Slider Name="PhaseSlider"
-                                IsSnapToTickEnabled="True" TickFrequency=".0001" Minimum="-10"
-                                Maximum="10" />
-                        </DockPanel>
-                    </StackPanel>
-                    <!-- End Sliders -->
-
+                   
                     <!-- Plots Grid -->
-                    <StackPanel Margin="0,10,0,0" Grid.Row="4">
+                    <StackPanel Margin="0,10,0,0" Grid.Row="0">
                         <DataGrid Name="PlotDataGrid" 
                                   AutoGenerateColumns="False"
                                   CanUserAddRows="False"
                                   CanUserDeleteRows="False"
                                   CanUserSortColumns="False"
-                                  CanUserReorderColumns="False"
-                                  CanUserResizeColumns="False"
+                                  CanUserReorderColumns="True"
+                                  CanUserResizeColumns="True"
                                   CanUserResizeRows="False"
-                                  ColumnWidth="*">
+                                  RowHeaderWidth="0"
+                                  HorizontalAlignment="Stretch"
+                                  HorizontalContentAlignment="Stretch"
+                                  ColumnWidth="auto">
+                            <DataGrid.ContextMenu>
+                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                    <MenuItem Header="FFT Analyse" Click="DataGridMenuItemFFT_Clicked"/>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
                             <DataGrid.Columns>
                                 <DataGridTextColumn  Binding="{Binding Path=Name, Mode=OneWay}" Header="Plot Name"/>
                                 <DataGridTextColumn Binding="{Binding Path=PointCount, Mode=OneWay}" Header="Point Count"/>
+                                <DataGridTextColumn Binding="{Binding Path=SampleRate, Mode=OneWay}" Header="Sample Rate"/>
+                                <DataGridTextColumn Binding="{Binding Path=SamplePeriod, Mode=OneWay}" Header="Sample Period"/>
+                                <DataGridTextColumn Binding="{Binding Path=Frequency, Mode=OneWay}" Header="Frequency"/>
+                                <DataGridTextColumn Binding="{Binding Path=Phase, Mode=OneWay}" Header="Phase"/>
+                                <DataGridTextColumn Binding="{Binding Path=Amplitude, Mode=OneWay}" Header="Amplitude"/>
                                 <DataGridCheckBoxColumn Binding="{Binding Path=Visible, Mode=TwoWay}" Header="Visible">
                                     <DataGridCheckBoxColumn.CellStyle>
                                         <Style>

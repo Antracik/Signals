@@ -7,10 +7,14 @@ namespace Signals.Models
 {
     public class PlotModel
     { 
-        public PlottableScatter Plot { get; set; }
+        public PlottableSignal Plot { get; set; }
         public bool Visible { get; set; } = true;
-
         public string Name => Plot.label;
-        public int PointCount => Plot.pointCount;
+        public int? Frequency { get; set; }
+        public int? Phase { get; set; }
+        public int? Amplitude { get; set; }
+        public int PointCount => Plot.GetPointCount();
+        public double SampleRate => Plot.sampleRate;
+        public double SamplePeriod => Plot.samplePeriod;
     }
 }

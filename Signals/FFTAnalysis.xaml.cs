@@ -56,7 +56,7 @@ namespace Signals
             FFTPlot.plt.Title($"FFT Analysis of {plot.label}");
             FFTPlot.plt.XLabel("Frequency (Hz)", fontSize: 18, bold: true);
             FFTPlot.plt.YLabel("Magnitude", fontSize: 18, bold: true);
-            frequencyDomainPlot = FFTPlot.plt.PlotSignal(magYs, sampleSize / sampleRate);
+            frequencyDomainPlot = FFTPlot.plt.PlotSignal(magYs);
             plottableText = FFTPlot.plt.PlotText("", .0, .0);
             plottableScatter = FFTPlot.plt.PlotPoint(.0, .0);
             xs = DataGen.Consecutive(magYs.Length);

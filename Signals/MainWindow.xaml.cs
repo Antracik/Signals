@@ -26,7 +26,7 @@ namespace Signals
     {
         #region Private values
 
-        private const int pointCount = 250;
+        private const int pointCount = 100;
         private const int sampleRate = 500;
         private Point mousePosition;
         private PlottableVLine _plottedLine1;
@@ -133,7 +133,6 @@ namespace Signals
         {
             var maxPoint = Math.Max(_plottedLine1.position, _plottedLine2.position);
             var minPoint = Math.Min(_plottedLine1.position, _plottedLine2.position);
-
             ObservableCollection<PlotModel> newCollection = new ObservableCollection<PlotModel>();
             foreach (var plotModel in plots)
             {

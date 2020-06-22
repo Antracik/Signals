@@ -23,11 +23,7 @@
             <!--End Grid Column Definitions-->
 
             <!-- Main Plot -->
-            <ScottPlot:WpfPlot Grid.Column="0" Name="SinePlot" >
-                <ScottPlot:WpfPlot.ContextMenu>
-                    <ContextMenu Opened="PlotMenu_OnOpened"/>
-                </ScottPlot:WpfPlot.ContextMenu>
-            </ScottPlot:WpfPlot>
+            <ScottPlot:WpfPlot Grid.Column="0" Name="SinePlot" />
             <!-- End Main Plot -->
 
             <StackPanel Margin="5" Grid.Column="1">

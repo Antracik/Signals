@@ -5,17 +5,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Input;
 using MathNet.Numerics;
 using ScottPlot;
 using Signals.Models;
-using MathNet.Numerics.IntegralTransforms;
 using static Signals.Utility;
-using static ScottPlot.DataGen;
 using Color = System.Drawing.Color;
 using Window = System.Windows.Window;
-using System.Numerics;
+
 #pragma warning disable CS0618 
 namespace Signals
 {
@@ -26,8 +22,8 @@ namespace Signals
     {
         #region Private values
 
-        private const int pointCount = 100;
-        private const int sampleRate = 500;
+        private const int pointCount = 500;
+        private const int sampleRate = 1000;
         private Point mousePosition;
         private PlottableVLine _plottedLine1;
         private PlottableVLine _plottedLine2;
@@ -76,24 +72,28 @@ namespace Signals
 
                 for (int i = 0; i < waveCount; i++)
                 {
-                    plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(waveList[i].ys, sampleRate, label: $"Inner Wave{i}"), Amplitude = waveList[i].amplitude, Frequency = waveList[i].frequency, Phase = waveList[i].phase });
+                    plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(waveList[i].ys, sampleRate, label: $"Harmonic{i}"), Amplitude = waveList[i].amplitude, Frequency = waveList[i].frequency, Phase = waveList[i].phase });
                 }
 
                 var combined = CombineSinusodial(waveList.Select(x => x.ys));
-                plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(combined, sampleRate, label: "ExampleSignal") });
+                plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(combined, sampleRate, label: "CombinedSignal") });
             }
 
             #region SetupPlot
             _line = new MenuItem();
             _clearLines = new MenuItem();
             _openWindow = new MenuItem();
-            _plotMenu = SinePlot.ContextMenu;
+
+            //_plotMenu = SinePlot.ContextMenu;
+            _plotMenu = new ContextMenu();
+
             _plottedLine1 = SinePlot.plt.PlotVLine(0, Color.Red, lineStyle: LineStyle.DashDotDot, lineWidth: 2.5);
             _plottedLine2 = SinePlot.plt.PlotVLine(0, Color.Red, lineStyle: LineStyle.DashDotDot, lineWidth: 2.5);
             _plottedSpan = SinePlot.plt.PlotHSpan(0, 0, Color.Gold);
             SinePlot.plt.PlotHLine(0D, lineStyle: LineStyle.DashDot);
             SinePlot.plt.PlotVLine(0D, lineStyle: LineStyle.DashDot);
 
+            _plotMenu.Opened += PlotMenu_OnOpened;
             _line.Click += MenuItemSelect_Click;
             _clearLines.Click += MenuItemClearSelect_Click;
             _openWindow.Click += MenuItemOpenSelection_Click;
@@ -111,6 +111,8 @@ namespace Signals
             _plottedLine1.visible = false;
             _plottedLine2.visible = false;
             _plottedSpan.visible = false;
+
+            SinePlot.ContextMenu = _plotMenu;
             #endregion
 
             SinePlot.Render();
@@ -145,7 +147,7 @@ namespace Signals
                     var ys = plot.ys.Skip(indexMin).Take(indexMax - indexMin).ToArray();
                     if (ys.Length > 0)
                     {
-                        var temp = new PlottableSignal(ys, plot.sampleRate, plot.xOffset, plot.yOffset, plot.color, plot.lineWidth, plot.markerSize, plot.label, plot.useParallel, null, ys.Length - 1);
+                        var temp = new PlottableSignal(ys, plot.sampleRate, plot.xOffset, plot.yOffset, plot.color, plot.lineWidth, plot.markerSize, plot.label, null, ys.Length - 1, LineStyle.Dash, useParallel: false);
                         newCollection.Add(new PlotModel { Plot = temp, Visible = true });
                     }
                 }
@@ -196,7 +198,8 @@ namespace Signals
 
         private void PlotMenu_OnOpened(object sender, RoutedEventArgs e)
         {
-            mousePosition = SinePlot.mouseCoordinates;
+            var (x, y) = SinePlot.GetMouseCoordinates();
+            mousePosition = new Point(x, y);
 
             _line.Header = _plottedLine1.visible
                 ? "Select to here..."

@@ -21,7 +21,7 @@ namespace Signals
     public partial class FFTAnalysis : Window
     {
 
-        private PlottableSignal frequencyDomainPlot;
+        private PlottableSignalConst<double> frequencyDomainPlot;
         private PlottableScatter plottableScatter;
         private PlottableText plottableText;
         private double[] xs;
@@ -34,34 +34,48 @@ namespace Signals
         {
             InitializeComponent();
 
-            int sampleSize = plot.GetPointCount();
-            Complex[] samples = new Complex[sampleSize];
-            var tempPlotYs = plot.ys;
-
-            for (int i = 0; i < sampleSize; i++)
-                samples[i] = new Complex(tempPlotYs[i], 0d);
-
-            Fourier.Forward(samples, FourierOptions.NoScaling);
-            double[] magYs = new double[samples.Length / 2];
-            double[] angleYs = new double[samples.Length / 2];
-            double sampleRate = plot.sampleRate;
-
-            for (int i = 0; i < samples.Length / 2; i++)
-            {
-                magYs[i] = (2.0 / sampleSize) * samples[i].Magnitude;
-                angleYs[i] = samples[i].Phase;
-            }
+            var magYs = PrepareFFT(plot.ys, plot.GetPointCount(), (int)plot.sampleRate);
 
             FFTPlot.plt.Ticks(useExponentialNotation: false, useMultiplierNotation: false, useOffsetNotation: false, rulerModeX: true, rulerModeY: true, logScaleX: true);
             FFTPlot.plt.Title($"FFT Analysis of {plot.label}");
             FFTPlot.plt.XLabel("Frequency (Hz)", fontSize: 18, bold: true);
             FFTPlot.plt.YLabel("Magnitude", fontSize: 18, bold: true);
-            frequencyDomainPlot = FFTPlot.plt.PlotSignal(magYs);
+            frequencyDomainPlot = FFTPlot.plt.PlotSignalConst(magYs);
             plottableText = FFTPlot.plt.PlotText("", .0, .0);
             plottableScatter = FFTPlot.plt.PlotPoint(.0, .0);
             xs = DataGen.Consecutive(magYs.Length);
             FFTPlot.MouseMove += OnMouseMove_Plot;
             FFTPlot.Render();
+        }
+
+        private double[] PrepareFFT(double[] dataY, int sampleSize, int sampleRate)
+        {
+            //find if the sample rate is bigger than the supplied samples 
+            int difference = 0;
+            if (sampleRate > sampleSize)
+                difference = sampleRate - sampleSize;
+
+            Complex[] samples = new Complex[sampleSize + difference];
+            var tempPlotYs = dataY;
+
+            for (int i = 0; i < sampleSize; i++)
+                samples[i] = new Complex(tempPlotYs[i], 0d);
+
+            if (difference > 0)
+                for (int i = samples.Length - 1; i < difference; i++)
+                    samples[i] = 0;
+
+            Fourier.Forward(samples, FourierOptions.NoScaling);
+            double[] magYs = new double[samples.Length / 2];
+            //double[] angleYs = new double[samples.Length / 2];
+
+            for (int i = 0; i < samples.Length / 2; i++)
+            {
+                magYs[i] = (2.0 / sampleSize) * samples[i].Magnitude;
+                //angleYs[i] = samples[i].Phase;
+            }
+
+            return magYs;
         }
 
         private void OnMouseMove_Plot(object sender, MouseEventArgs e)
@@ -71,7 +85,8 @@ namespace Signals
             if (e.MiddleButton == MouseButtonState.Pressed) return;
 
             // determine where the mouse is in coordinate space
-            var pos = FFTPlot.mouseCoordinates;
+            var (xPoint, yPoint) = FFTPlot.GetMouseCoordinates();
+            var pos = new Point(xPoint, yPoint);
 
             // determine which point is closest to the mouse
             int closestIndex = 0;

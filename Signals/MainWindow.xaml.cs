@@ -21,9 +21,8 @@ namespace Signals
     public partial class MainWindow : Window
     {
         #region Private values
-
-        private const int pointCount = 500;
-        private const int sampleRate = 1000;
+        private const int pointCount = 100;
+        private const int sampleRate = 100;
         private Point mousePosition;
         private PlottableVLine _plottedLine1;
         private PlottableVLine _plottedLine2;
@@ -32,7 +31,7 @@ namespace Signals
         private MenuItem _clearLines;
         private MenuItem _openWindow;
         private ContextMenu _plotMenu;
-        private ObservableCollection<PlotModel> plots = new ObservableCollection<PlotModel>();
+        private ObservableCollection<PlotModel> _plots = new ObservableCollection<PlotModel>();
 
         #endregion
 
@@ -45,20 +44,32 @@ namespace Signals
         public MainWindow(ObservableCollection<PlotModel> plots)
         {
             InitializeComponent();
-            this.plots = plots;
-            foreach (var plotModel in this.plots)
+            _plots = new ObservableCollection<PlotModel>();
+            foreach (var plotModel in plots)
             {
-                var plot = plotModel.Plot;
-                SinePlot.plt.PlotSignal(plot.ys, plot.sampleRate);
+                var temp = new PlotModel { Plot = SinePlot.plt.PlotSignal(plotModel.Plot.ys, plotModel.Plot.sampleRate, label: plotModel.Name), Visible = true, Amplitude = plotModel.Amplitude, Frequency = plotModel.Frequency, Phase = plotModel.Phase };
+                _plots.Add(temp);
             }
             InitializePlot(true);
         }
+
+        public MainWindow(PlotModel plotModel)
+        {
+            InitializeComponent();
+            _plots = new ObservableCollection<PlotModel>();
+            var temp = new PlotModel { Plot = SinePlot.plt.PlotSignal(plotModel.Plot.ys, plotModel.Plot.sampleRate, label: plotModel.Name), Visible = true, Amplitude = plotModel.Amplitude, Frequency = plotModel.Frequency, Phase = plotModel.Phase };
+            _plots.Add(temp);
+
+            InitializePlot(true);
+        }
+
+
 
         private void InitializePlot(bool skipDemoSineWave = false)
         {
             if (!skipDemoSineWave)
             {
-                var waveList = new List<(double[] ys,int frequency,int amplitude,int phase)>();
+                var waveList = new List<(double[] ys, int frequency, int amplitude, int phase)>();
 
                 int waveCount = 3;
 
@@ -72,11 +83,11 @@ namespace Signals
 
                 for (int i = 0; i < waveCount; i++)
                 {
-                    plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(waveList[i].ys, sampleRate, label: $"Harmonic{i}"), Amplitude = waveList[i].amplitude, Frequency = waveList[i].frequency, Phase = waveList[i].phase });
+                    _plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(waveList[i].ys, sampleRate, label: $"Harmonic{i}"), Amplitude = waveList[i].amplitude, Frequency = waveList[i].frequency, Phase = waveList[i].phase });
                 }
 
                 var combined = CombineSinusodial(waveList.Select(x => x.ys));
-                plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(combined, sampleRate, label: "CombinedSignal") });
+                _plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(combined, sampleRate, label: "CombinedSignal") });
             }
 
             #region SetupPlot
@@ -122,7 +133,9 @@ namespace Signals
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            PlotDataGrid.ItemsSource = plots;
+            PlotDataGrid.ItemsSource = _plots;
+            PlotDataGrid.IsSynchronizedWithCurrentItem = true;
+            PlotDataGrid.UnselectAll();
         }
 
         private void MenuItemClearSelect_Click(object sender, RoutedEventArgs e)
@@ -136,7 +149,7 @@ namespace Signals
             var maxPoint = Math.Max(_plottedLine1.position, _plottedLine2.position);
             var minPoint = Math.Min(_plottedLine1.position, _plottedLine2.position);
             ObservableCollection<PlotModel> newCollection = new ObservableCollection<PlotModel>();
-            foreach (var plotModel in plots)
+            foreach (var plotModel in _plots)
             {
                 if (plotModel.Visible)
                 {
@@ -148,7 +161,7 @@ namespace Signals
                     if (ys.Length > 0)
                     {
                         var temp = new PlottableSignal(ys, plot.sampleRate, plot.xOffset, plot.yOffset, plot.color, plot.lineWidth, plot.markerSize, plot.label, null, ys.Length - 1, LineStyle.Dash, useParallel: false);
-                        newCollection.Add(new PlotModel { Plot = temp, Visible = true });
+                        newCollection.Add(new PlotModel { Plot = temp, Visible = true, Amplitude = plotModel.Amplitude, Frequency = plotModel.Frequency, Phase = plotModel.Phase });
                     }
                 }
             }
@@ -160,7 +173,7 @@ namespace Signals
         private void MenuItemSelect_Click(object sender, RoutedEventArgs e)
         {
             List<(int index, double value)> closestValues = new List<(int index, double value)>();
-            foreach (var plotModel in plots)
+            foreach (var plotModel in _plots)
             {
                 if (plotModel.Visible)
                 {
@@ -218,35 +231,37 @@ namespace Signals
                 : Visibility.Collapsed;
         }
 
-        private void Visible_Unchecked(object sender, RoutedEventArgs e)
-        {
-            var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
-            if (selectedItem != null)
-            {
-                selectedItem.Visible = false;
-                SinePlot.plt.GetPlottables().Find(x => x.GetLegendItems()[0].label == selectedItem.Name).visible = false;
-                SinePlot.Render();
-            }
-        }
-
-        private void Visible_Checked(object sender, RoutedEventArgs e)
-        {
-            var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
-            if (selectedItem != null)
-            {
-                selectedItem.Visible = true;
-                SinePlot.plt.GetPlottables().Find(x => x.GetLegendItems()[0].label == selectedItem.Name).visible = true;
-                SinePlot.Render();
-            }
-        }
         private void DataGridMenuItemFFT_Clicked(object sender, RoutedEventArgs e)
         {
-            var test = (PlotModel)PlotDataGrid.SelectedItem;
-            if (test == null)
+            var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
+            if (selectedItem == null)
                 return;
 
-            var FFTWindow = new FFTAnalysis(test.Plot);
+            var FFTWindow = new FFTAnalysis(selectedItem.Plot);
             FFTWindow.Show();
+        }
+
+        private void ToggleVisibility(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
+            if (selectedItem != null)
+            {
+                var temp = SinePlot.plt.GetPlottables().FirstOrDefault(x => x == selectedItem.Plot);
+                if (temp != null)
+                    temp.visible ^= true;
+
+                SinePlot.Render();
+            }
+        }
+
+        private void DataGridMenuItemOpenInNewWindow_Clicked(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
+            if (selectedItem == null)
+                return;
+
+            var window = new MainWindow(selectedItem);
+            window.Show();
         }
 
         #endregion

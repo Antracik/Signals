@@ -50,8 +50,13 @@ namespace Signals
 
         private double[] PrepareFFT(double[] dataY, int sampleSize, int sampleRate)
         {
-            //find if the sample rate is bigger than the supplied samples 
+            //find if the sample size is bigger than the sample rate, if it is then we ignore the extra data
+            if (sampleSize > sampleRate)
+                sampleSize = sampleRate;
+
+            //find if the sample rate is bigger than the supplied samples and later pad with zeros if needed
             int difference = 0;
+            
             if (sampleRate > sampleSize)
                 difference = sampleRate - sampleSize;
 
@@ -61,6 +66,7 @@ namespace Signals
             for (int i = 0; i < sampleSize; i++)
                 samples[i] = new Complex(tempPlotYs[i], 0d);
 
+            //pad with zeroz if needed
             if (difference > 0)
                 for (int i = samples.Length - 1; i < difference; i++)
                     samples[i] = 0;

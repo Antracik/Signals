@@ -21,8 +21,8 @@ namespace Signals
     public partial class MainWindow : Window
     {
         #region Private values
-        private const int pointCount = 100;
-        private const int sampleRate = 100;
+        private const int pointCount = 1000;
+        private const int sampleRate = 1000;
         private Point mousePosition;
         private PlottableVLine _plottedLine1;
         private PlottableVLine _plottedLine2;
@@ -63,10 +63,9 @@ namespace Signals
             InitializePlot(true);
         }
 
-
-
         private void InitializePlot(bool skipDemoSineWave = false)
         {
+            #region Demo Wave
             if (!skipDemoSineWave)
             {
                 var waveList = new List<(double[] ys, int frequency, int amplitude, int phase)>();
@@ -89,6 +88,8 @@ namespace Signals
                 var combined = CombineSinusodial(waveList.Select(x => x.ys));
                 _plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(combined, sampleRate, label: "CombinedSignal") });
             }
+
+            #endregion
 
             #region SetupPlot
             _line = new MenuItem();
@@ -128,6 +129,8 @@ namespace Signals
 
             SinePlot.Render();
         }
+
+        
 
         #region Event Handlers
 
@@ -241,12 +244,13 @@ namespace Signals
             FFTWindow.Show();
         }
 
-        private void ToggleVisibility(object sender, RoutedEventArgs e)
+        private void DataGridToggleWaveVisibility(object sender, RoutedEventArgs e)
         {
             var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
             if (selectedItem != null)
             {
                 var temp = SinePlot.plt.GetPlottables().FirstOrDefault(x => x == selectedItem.Plot);
+
                 if (temp != null)
                     temp.visible ^= true;
 
@@ -264,6 +268,30 @@ namespace Signals
             window.Show();
         }
 
+        private void DataGridMenuItemRemove_Clicked(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
+            if (selectedItem == null)
+                return;
+
+            _plots.Remove(selectedItem);
+            SinePlot.plt.Clear(plotToRemove => plotToRemove == selectedItem.Plot);
+
+            SinePlot.Render();
+        }
+
+
         #endregion
+
+        private void DataGridMenuItemViewValues_Clicked(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
+            if (selectedItem == null)
+                return;
+
+            var dataViewWindow = new DataViewWindow(selectedItem);
+
+            dataViewWindow.Show();
+        }
     }
 }

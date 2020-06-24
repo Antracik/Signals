@@ -48,11 +48,16 @@
                                   RowHeaderWidth="0"
                                   HorizontalAlignment="Stretch"
                                   HorizontalContentAlignment="Stretch"
-                                  ColumnWidth="auto">
+                                  ColumnWidth="auto"
+                                  SelectionMode="Single">
                             <DataGrid.ContextMenu>
                                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                                     <MenuItem Header="FFT Analyse" Click="DataGridMenuItemFFT_Clicked"/>
+                                    <Separator/>
                                     <MenuItem Header="Open In New Window" Click="DataGridMenuItemOpenInNewWindow_Clicked"/>
+                                    <MenuItem Header="View Values" Click="DataGridMenuItemViewValues_Clicked"/>
+                                    <Separator/>
+                                    <MenuItem Header="Remove" Click="DataGridMenuItemRemove_Clicked"/>
                                 </ContextMenu>
                             </DataGrid.ContextMenu>
                             <DataGrid.Columns>
@@ -63,11 +68,11 @@
                                 <DataGridTextColumn Binding="{Binding Path=Frequency, Mode=OneWay}" Header="Frequency"/>
                                 <DataGridTextColumn Binding="{Binding Path=Phase, Mode=OneWay}" Header="Phase"/>
                                 <DataGridTextColumn Binding="{Binding Path=Amplitude, Mode=OneWay}" Header="Amplitude"/>
-                                <DataGridCheckBoxColumn Binding="{Binding Path=Visible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Visible">
+                                <DataGridCheckBoxColumn Width="*" Binding="{Binding Path=Visible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Visible">
                                     <DataGridCheckBoxColumn.CellStyle>
                                         <Style>
-                                            <EventSetter Event="CheckBox.Unchecked" Handler="ToggleVisibility"/>
-                                            <EventSetter Event="CheckBox.Checked" Handler="ToggleVisibility"/>
+                                            <EventSetter Event="CheckBox.Unchecked" Handler="DataGridToggleWaveVisibility"/>
+                                            <EventSetter Event="CheckBox.Checked" Handler="DataGridToggleWaveVisibility"/>
                                         </Style>
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>

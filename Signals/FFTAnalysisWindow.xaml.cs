@@ -1,7 +1,10 @@
 ﻿using MathNet.Numerics.IntegralTransforms;
 using ScottPlot;
+using Signals.Models;
+using Signals.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Windows;
@@ -18,26 +21,35 @@ namespace Signals
     /// <summary>
     /// Interaction logic for FFTAnalysis.xaml
     /// </summary>
-    public partial class FFTAnalysis : Window
+    public partial class FFTAnalysisWindow : Window
     {
 
+        private FFTAnalysisViewModel Instance { get; set; }
+        //Not sure if I can bind these to XAML in ScottPlot so for now use them as they are
         private PlottableSignalConst<double> frequencyDomainPlot;
         private PlottableScatter plottableScatter;
         private PlottableText plottableText;
         private double[] xs;
 
-        public FFTAnalysis()
+        public FFTAnalysisWindow()
         {
             InitializeComponent();
         }
-        public FFTAnalysis(PlottableSignal plot)
+        public FFTAnalysisWindow(PlotModel model)
         {
             InitializeComponent();
 
-            var magYs = PrepareFFT(plot.ys, plot.GetPointCount(), (int)plot.sampleRate);
 
+            var magYs = PrepareFFT(model.Plot.ys, model.Plot.GetPointCount(), (int)model.Plot.sampleRate);
+            Instance = new FFTAnalysisViewModel
+            {
+                FFTAnalysisModels = Utility.FitFFTModel(magYs).ToList(),
+                PlotName = model.Name
+            };
+
+            DataContext = Instance;
             FFTPlot.plt.Ticks(useExponentialNotation: false, useMultiplierNotation: false, useOffsetNotation: false, rulerModeX: true, rulerModeY: true, logScaleX: true);
-            FFTPlot.plt.Title($"FFT Analysis of {plot.label}");
+            FFTPlot.plt.Title($"FFT Analysis of {Instance.PlotName}");
             FFTPlot.plt.XLabel("Frequency (Hz)", fontSize: 18, bold: true);
             FFTPlot.plt.YLabel("Magnitude", fontSize: 18, bold: true);
             frequencyDomainPlot = FFTPlot.plt.PlotSignalConst(magYs);
@@ -56,7 +68,7 @@ namespace Signals
 
             //find if the sample rate is bigger than the supplied samples and later pad with zeros if needed
             int difference = 0;
-            
+
             if (sampleRate > sampleSize)
                 difference = sampleRate - sampleSize;
 

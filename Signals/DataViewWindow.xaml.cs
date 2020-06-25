@@ -40,30 +40,10 @@ namespace Signals
                 PointCount = model.PointCount,
                 SamplePeriod = model.SamplePeriod,
                 SampleRate = (int)model.SampleRate,
-                DataViewModels = new List<DataViewModel>()
+                DataViewModels = Utility.ExtractDataModel(model).ToList()
             };
 
-            int[] indexes = DataGen.Consecutive(model.PointCount).Select(x => (int)x).ToArray();
-            double[] time = DataGen.Consecutive(model.PointCount, model.SamplePeriod);
-            double[] values = model.Plot.ys;
-
-            int length = model.PointCount;
-            for (int i = 0; i < length; i++)
-            {
-                Instance.DataViewModels.Add(new DataViewModel
-                {
-                    Index = indexes[i],
-                    Time = time[i],
-                    Value = values[i]
-                });
-            }
-
             DataContext = Instance;
-        }
-
-        private void OnLoaded(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

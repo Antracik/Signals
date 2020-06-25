@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Signals"
         mc:Ignorable="d"
-        Title="{Binding Path=PlotName, StringFormat=Data View for: {0} }" Height="450" Width="350"
-        Loaded="OnLoaded">
+        Title="{Binding Path=PlotName, FallbackValue=Plot, TargetNullValue=Plot, StringFormat=Data View for: {0} }" Height="450" Width="350"
+        >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -40,7 +40,7 @@
                 </Grid>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="1">
-                <Grid >
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>

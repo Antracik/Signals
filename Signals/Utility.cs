@@ -1,13 +1,51 @@
 ﻿using MathNet.Numerics;
 using ScottPlot;
+using Signals.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Signals
 {
-    public class Utility
+    public static class Utility
     {
+        public static IEnumerable<DataViewModel> ExtractDataModel(PlotModel model)
+        {
+            List<DataViewModel> dataModels = new List<DataViewModel>();
+
+            int[] indexes = DataGen.Consecutive(model.PointCount).Select(x => (int)x).ToArray();
+            double[] time = DataGen.Consecutive(model.PointCount, model.SamplePeriod);
+            double[] values = model.Plot.ys;
+
+            int length = model.PointCount;
+            for (int i = 0; i < length; i++)
+            {
+                dataModels.Add(new DataViewModel
+                {
+                    Index = indexes[i],
+                    Time = time[i],
+                    Value = values[i]
+                });
+            }
+
+            return dataModels;
+        }
+
+        public static IEnumerable<FFTAnalysisModel> FitFFTModel(double[] FFTValues)
+        {
+            List<FFTAnalysisModel> models = new List<FFTAnalysisModel>();
+
+            int length = FFTValues.Length;
+            int[] hertz = DataGen.Consecutive(length).Select(x => (int)x).ToArray();
+            
+            for (int i = 0; i < length - 1; i++)
+            {
+                models.Add(new FFTAnalysisModel { Hertz = hertz[i], Value = FFTValues[i] });
+            }
+
+            return models;
+        }
+
         public static IEnumerable<(double[] xs, double[] ys)> GenerateRandomScatterPoints(int pointCount, int sampleRate)
         {
             Random rand = new Random();

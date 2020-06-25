@@ -21,7 +21,7 @@ namespace Signals
     public partial class MainWindow : Window
     {
         #region Private values
-        private const int pointCount = 1000;
+        private const int pointCount = 500;
         private const int sampleRate = 1000;
         private Point mousePosition;
         private PlottableVLine _plottedLine1;
@@ -240,7 +240,7 @@ namespace Signals
             if (selectedItem == null)
                 return;
 
-            var FFTWindow = new FFTAnalysis(selectedItem.Plot);
+            var FFTWindow = new FFTAnalysisWindow(selectedItem);
             FFTWindow.Show();
         }
 
@@ -280,9 +280,6 @@ namespace Signals
             SinePlot.Render();
         }
 
-
-        #endregion
-
         private void DataGridMenuItemViewValues_Clicked(object sender, RoutedEventArgs e)
         {
             var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
@@ -293,5 +290,6 @@ namespace Signals
 
             dataViewWindow.Show();
         }
+        #endregion
     }
 }

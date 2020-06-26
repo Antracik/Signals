@@ -3,19 +3,11 @@ using ScottPlot;
 using Signals.Models;
 using Signals.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-#pragma warning disable CS0618 
+
 namespace Signals
 {
     /// <summary>
@@ -26,10 +18,10 @@ namespace Signals
 
         private FFTAnalysisViewModel Instance { get; set; }
         //Not sure if I can bind these to XAML in ScottPlot so for now use them as they are
-        private PlottableSignalConst<double> frequencyDomainPlot;
-        private PlottableScatter plottableScatter;
-        private PlottableText plottableText;
-        private double[] xs;
+        private readonly PlottableSignalConst<double> frequencyDomainPlot;
+        private readonly PlottableScatter plottableScatter;
+        private readonly PlottableText plottableText;
+        private readonly double[] xs;
 
         public FFTAnalysisWindow()
         {

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using MathNet.Numerics;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using ScottPlot;
 using Signals.Models;
 using static Signals.Utility;
@@ -118,7 +120,7 @@ namespace Signals
             _clearLines.Header = "Clear Selection";
             _openWindow.Header = "Open Selection in new window";
             _savePNG.Header = "Save Image";
-            
+
             _plotMenu.Items.Add(_line);
             _plotMenu.Items.Add(_openWindow);
             _plotMenu.Items.Add(_clearLines);
@@ -328,20 +330,83 @@ namespace Signals
                 _plots.Add(addCustomWaveWindow.ResultPlot);
                 SinePlot.plt.Add(addCustomWaveWindow.ResultPlot.Plot);
             }
+
+            SinePlot.Render();
             PlotDataGrid.UnselectAll();
         }
 
-        private void DataGridMenuItemExportCSV_Clicked(object sender, RoutedEventArgs e)
+        private void DataGridMenuItemExportJSON_Clicked(object sender, RoutedEventArgs e)
         {
             var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
             if (selectedItem == null)
                 return;
 
+            SaveFileDialog savefile = new SaveFileDialog
+            {
+                FileName = "WavePlot.json",
+                Filter = "JSON file (*.json)|*.json" +
+                         "| All Files (*.*)|*.*"
+
+            };
+
+            if (savefile.ShowDialog() == true)
+            {
+                JSONPlotModel jsonModel = new JSONPlotModel
+                {
+                    Amplitude = selectedItem.Amplitude,
+                    Data = selectedItem.Plot.ys,
+                    Frequency = selectedItem.Frequency,
+                    Name = selectedItem.Name,
+                    Phase = selectedItem.Phase,
+                    PointCount = selectedItem.PointCount,
+                    SamplePeriod = selectedItem.SamplePeriod,
+                    SampleRate = selectedItem.SampleRate
+                };
+
+                using StreamWriter file = File.CreateText(savefile.FileName);
+                new JsonSerializer().Serialize(file, jsonModel);
+            }
 
         }
+        private void DataGridMenuItemReadFromFile_Clicked(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "JSON file (*.json)|*.json" +
+                         "| All Files (*.*)|*.*"
+            };
 
+            try
+            {
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    using StreamReader file = File.OpenText(openFileDialog.FileName);
+
+                    JSONPlotModel deserializedPlot = (JSONPlotModel)new JsonSerializer().Deserialize(file, typeof(JSONPlotModel));
+
+                    PlotDataGrid.UnselectAll();
+
+                    var plot = SinePlot.plt.PlotSignal(deserializedPlot.Data, deserializedPlot.SampleRate, label: deserializedPlot.Name);
+
+                    _plots.Add(new PlotModel
+                    {
+                        Amplitude = deserializedPlot.Amplitude,
+                        Frequency = deserializedPlot.Frequency,
+                        Phase = deserializedPlot.Phase,
+                        Plot = plot
+                    });
+
+                    SinePlot.Render();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("There was a problem reading the json file", "Error Reading From FIle", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         #endregion
+
 
     }
 }

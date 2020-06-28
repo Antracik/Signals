@@ -59,9 +59,9 @@
                                     <MenuItem Header="Open In New Window" Click="DataGridMenuItemOpenInNewWindow_Clicked"/>
                                     <MenuItem Header="Add">
                                         <MenuItem Header="Custom" Click="DataGridMenuItemAddCustom_Clicked"/>
-                                        <MenuItem Header="From File"/>
+                                        <MenuItem Header="From JSON File" Click="DataGridMenuItemReadFromFile_Clicked"/>
                                     </MenuItem>
-                                    <MenuItem Header="Export CSV" Click="DataGridMenuItemExportCSV_Clicked"/>
+                                    <MenuItem Header="Export JSON" Click="DataGridMenuItemExportJSON_Clicked"/>
                                     <MenuItem Header="View Values" Click="DataGridMenuItemViewValues_Clicked"/>
                                     <Separator/>
                                     <MenuItem Header="Remove" Click="DataGridMenuItemRemove_Clicked"/>

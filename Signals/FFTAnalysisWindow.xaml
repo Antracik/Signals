@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Signals"
         xmlns:ScottPlot="clr-namespace:ScottPlot;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
         Title="FFT Analysis Result" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>

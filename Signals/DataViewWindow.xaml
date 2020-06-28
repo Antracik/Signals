@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Signals"
         mc:Ignorable="d"
-        Title="{Binding Path=PlotName, FallbackValue=Plot, TargetNullValue=Plot, StringFormat=Data View for: {0} }" Height="450" Width="350"
+        Title="{Binding Path=PlotName, FallbackValue=Plot, TargetNullValue=Plot, StringFormat=Data View for: {0} }" 
+        Height="450" Width="350" 
+        WindowStartupLocation="CenterScreen"
         >
     <Grid>
         <Grid.RowDefinitions>

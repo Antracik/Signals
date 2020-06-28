@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using MathNet.Numerics;
+using Microsoft.Win32;
 using ScottPlot;
 using Signals.Models;
 using static Signals.Utility;
@@ -29,8 +30,9 @@ namespace Signals
         private MenuItem _line;
         private MenuItem _clearLines;
         private MenuItem _openWindow;
+        private MenuItem _savePNG;
         private ContextMenu _plotMenu;
-        private ObservableCollection<PlotModel> _plots = new ObservableCollection<PlotModel>();
+        private readonly ObservableCollection<PlotModel> _plots = new ObservableCollection<PlotModel>();
 
         #endregion
 
@@ -94,8 +96,8 @@ namespace Signals
             _line = new MenuItem();
             _clearLines = new MenuItem();
             _openWindow = new MenuItem();
+            _savePNG = new MenuItem();
 
-            //_plotMenu = SinePlot.ContextMenu;
             _plotMenu = new ContextMenu();
 
             _plottedLine1 = SinePlot.plt.PlotVLine(0, Color.Red, lineStyle: LineStyle.DashDotDot, lineWidth: 2.5);
@@ -108,16 +110,20 @@ namespace Signals
             _line.Click += MenuItemSelect_Click;
             _clearLines.Click += MenuItemClearSelect_Click;
             _openWindow.Click += MenuItemOpenSelection_Click;
+            _savePNG.Click += MenuItemSavePNG_Click;
 
             SinePlot.plt.Title("Signals");
             SinePlot.plt.XLabel("Time (s)");
             SinePlot.plt.YLabel("Amplitude");
             _clearLines.Header = "Clear Selection";
             _openWindow.Header = "Open Selection in new window";
-
+            _savePNG.Header = "Save Image";
+            
             _plotMenu.Items.Add(_line);
             _plotMenu.Items.Add(_openWindow);
             _plotMenu.Items.Add(_clearLines);
+            _plotMenu.Items.Add(new Separator());
+            _plotMenu.Items.Add(_savePNG);
 
             _plottedLine1.visible = false;
             _plottedLine2.visible = false;
@@ -129,7 +135,7 @@ namespace Signals
             SinePlot.Render();
         }
 
-        
+
 
         #region Event Handlers
 
@@ -146,6 +152,21 @@ namespace Signals
             SinePlot.Render();
         }
 
+        private void MenuItemSavePNG_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog savefile = new SaveFileDialog
+            {
+                FileName = "WavePlot.png",
+                Filter = "PNG Files (*.png)|*.png;*.png" +
+                         "|JPG Files (*.jpg, *.jpeg)|*.jpg;*.jpeg" +
+                         "|BMP Files (*.bmp)|*.bmp;*.bmp" +
+                         "|TIF files (*.tif, *.tiff)|*.tif;*.tiff" +
+                         "|All files (*.*)|*.*"
+            };
+            if (savefile.ShowDialog() == true)
+                SinePlot.plt.SaveFig(savefile.FileName);
+        }
+
         private void MenuItemOpenSelection_Click(object sender, RoutedEventArgs e)
         {
             var maxPoint = Math.Max(_plottedLine1.position, _plottedLine2.position);
@@ -157,8 +178,16 @@ namespace Signals
                 {
                     var plot = plotModel.Plot;
                     var xs = DataGen.Consecutive(plot.GetPointCount(), plot.samplePeriod);
-                    int indexMax = (int)(xs.First(x => x.AlmostEqual(maxPoint)) * plot.sampleRate);
-                    int indexMin = (int)(xs.First(x => x.AlmostEqual(minPoint)) * plot.sampleRate);
+                    int indexMax = (int)(xs.FirstOrDefault(x => x.AlmostEqual(maxPoint)) * plot.sampleRate);
+                    if (indexMax == 0)
+                        indexMax = xs.Length;
+                    indexMax += 1; //offset index by 1
+
+                    int indexMin = (int)(xs.FirstOrDefault(x => x.AlmostEqual(minPoint)) * plot.sampleRate);
+
+                    indexMax = Math.Max(indexMin, indexMax);
+                    indexMin = Math.Min(indexMin, indexMax);
+
                     var ys = plot.ys.Skip(indexMin).Take(indexMax - indexMin).ToArray();
                     if (ys.Length > 0)
                     {
@@ -289,6 +318,30 @@ namespace Signals
 
             dataViewWindow.Show();
         }
+
+        private void DataGridMenuItemAddCustom_Clicked(object sender, RoutedEventArgs e)
+        {
+            var addCustomWaveWindow = new AddWaveWindow();
+
+            if (addCustomWaveWindow.ShowDialog() == true)
+            {
+                _plots.Add(addCustomWaveWindow.ResultPlot);
+                SinePlot.plt.Add(addCustomWaveWindow.ResultPlot.Plot);
+            }
+            PlotDataGrid.UnselectAll();
+        }
+
+        private void DataGridMenuItemExportCSV_Clicked(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
+            if (selectedItem == null)
+                return;
+
+
+        }
+
+
         #endregion
+
     }
 }

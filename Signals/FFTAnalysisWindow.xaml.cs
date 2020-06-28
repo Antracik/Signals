@@ -27,6 +27,7 @@ namespace Signals
         {
             InitializeComponent();
         }
+        
         public FFTAnalysisWindow(PlotModel model)
         {
             InitializeComponent();

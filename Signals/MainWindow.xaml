@@ -50,16 +50,26 @@
                                   HorizontalContentAlignment="Stretch"
                                   ColumnWidth="auto"
                                   SelectionMode="Single">
+                            
+                            <!-- DataGrid ContextMenu -->
                             <DataGrid.ContextMenu>
                                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                                     <MenuItem Header="FFT Analyse" Click="DataGridMenuItemFFT_Clicked"/>
                                     <Separator/>
                                     <MenuItem Header="Open In New Window" Click="DataGridMenuItemOpenInNewWindow_Clicked"/>
+                                    <MenuItem Header="Add">
+                                        <MenuItem Header="Custom" Click="DataGridMenuItemAddCustom_Clicked"/>
+                                        <MenuItem Header="From File"/>
+                                    </MenuItem>
+                                    <MenuItem Header="Export CSV" Click="DataGridMenuItemExportCSV_Clicked"/>
                                     <MenuItem Header="View Values" Click="DataGridMenuItemViewValues_Clicked"/>
                                     <Separator/>
                                     <MenuItem Header="Remove" Click="DataGridMenuItemRemove_Clicked"/>
                                 </ContextMenu>
                             </DataGrid.ContextMenu>
+                            <!-- End DataGrid ContextMenu -->
+
+                            
                             <DataGrid.Columns>
                                 <DataGridTextColumn Binding="{Binding Path=Name, Mode=OneWay}" Header="Plot Name"/>
                                 <DataGridTextColumn Binding="{Binding Path=PointCount, Mode=OneWay}" Header="Point Count"/>

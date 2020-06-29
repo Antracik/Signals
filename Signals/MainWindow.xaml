@@ -12,32 +12,59 @@
         Height="800" 
         Width="1200" 
         WindowStyle="SingleBorderWindow" 
-        WindowStartupLocation="CenterScreen">
-    <Border Margin="5">
+        WindowStartupLocation="CenterScreen"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        WindowState="Maximized">
+    <Border>
         <Grid>
-            <!--Grid Column Definitions-->
+            <!--Grid Column And Rows Definitions-->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            <!--End Grid Column Definitions-->
+            <!--End Grid Column And Rows Definitions-->
+
+            <ToolBar Grid.Row="0" Background="{DynamicResource MaterialDesignPaper}">
+                <Menu>
+                    <MenuItem Header="File">
+                        <MenuItem Header="Add">
+                            <MenuItem Header="Custom Wave" Click="AddCustomWave"/>
+                            <MenuItem Header="From JSON" Click="ReadFromJsonFile"/>
+                        </MenuItem>
+                        <MenuItem Header="Save as Image" Click="SavePlotAsImage"/>
+                        <Separator/>
+                        <MenuItem Header="Close" Click="ExitProgram"/>
+                    </MenuItem>
+                </Menu>
+            </ToolBar>
 
             <!-- Main Plot -->
-            <ScottPlot:WpfPlot Grid.Column="0" Name="SinePlot" />
+            <ScottPlot:WpfPlot Grid.Row="1" Grid.Column="0" Name="SinePlot" />
             <!-- End Main Plot -->
 
-            <StackPanel Margin="5" Grid.Column="1">
-                <Grid>
+            <Grid Margin="5" Grid.Row="1" Grid.Column="1">
 
-                    <!-- Grid Row Definitions -->
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <!-- End Grid Row Definitions -->
-                   
-                    <!-- Plots Grid -->
-                    <StackPanel Margin="0,10,0,0" Grid.Row="0">
-                        <DataGrid Name="PlotDataGrid" 
+                <!-- Grid Row Definitions -->
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <!-- End Grid Row Definitions -->
+
+                <!-- Plots Grid -->
+                <StackPanel Margin="0,10,0,0" Grid.Row="0">
+                    <DataGrid Name="PlotDataGrid" 
                                   AutoGenerateColumns="False"
                                   CanUserAddRows="False"
                                   CanUserDeleteRows="False"
@@ -48,51 +75,61 @@
                                   RowHeaderWidth="0"
                                   HorizontalAlignment="Stretch"
                                   HorizontalContentAlignment="Stretch"
-                                  ColumnWidth="auto"
-                                  SelectionMode="Single">
-                            
-                            <!-- DataGrid ContextMenu -->
-                            <DataGrid.ContextMenu>
-                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                    <MenuItem Header="FFT Analyse" Click="DataGridMenuItemFFT_Clicked"/>
-                                    <Separator/>
-                                    <MenuItem Header="Open In New Window" Click="DataGridMenuItemOpenInNewWindow_Clicked"/>
-                                    <MenuItem Header="Add">
-                                        <MenuItem Header="Custom" Click="DataGridMenuItemAddCustom_Clicked"/>
-                                        <MenuItem Header="From JSON File" Click="DataGridMenuItemReadFromFile_Clicked"/>
-                                    </MenuItem>
-                                    <MenuItem Header="Export JSON" Click="DataGridMenuItemExportJSON_Clicked"/>
-                                    <MenuItem Header="View Values" Click="DataGridMenuItemViewValues_Clicked"/>
-                                    <Separator/>
-                                    <MenuItem Header="Remove" Click="DataGridMenuItemRemove_Clicked"/>
-                                </ContextMenu>
-                            </DataGrid.ContextMenu>
-                            <!-- End DataGrid ContextMenu -->
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="All">
 
-                            
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Binding="{Binding Path=Name, Mode=OneWay}" Header="Plot Name"/>
-                                <DataGridTextColumn Binding="{Binding Path=PointCount, Mode=OneWay}" Header="Point Count"/>
-                                <DataGridTextColumn Binding="{Binding Path=SampleRate, Mode=OneWay}" Header="Sample Rate"/>
-                                <DataGridTextColumn Binding="{Binding Path=SamplePeriod, Mode=OneWay}" Header="Sample Period"/>
-                                <DataGridTextColumn Binding="{Binding Path=Frequency, Mode=OneWay}" Header="Frequency"/>
-                                <DataGridTextColumn Binding="{Binding Path=Phase, Mode=OneWay}" Header="Phase"/>
-                                <DataGridTextColumn Binding="{Binding Path=Amplitude, Mode=OneWay}" Header="Amplitude"/>
-                                <DataGridCheckBoxColumn Width="*" Binding="{Binding Path=Visible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Visible">
-                                    <DataGridCheckBoxColumn.CellStyle>
-                                        <Style>
-                                            <EventSetter Event="CheckBox.Unchecked" Handler="DataGridToggleWaveVisibility"/>
-                                            <EventSetter Event="CheckBox.Checked" Handler="DataGridToggleWaveVisibility"/>
-                                        </Style>
-                                    </DataGridCheckBoxColumn.CellStyle>
-                                </DataGridCheckBoxColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
-                    <!--End Plot Grid-->
+                        <!-- DataGrid ContextMenu -->
+                        <DataGrid.ContextMenu>
+                            <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                <MenuItem Header="FFT Analyse" Click="DataGridMenuItemFFT_Clicked"/>
+                                <Separator/>
+                                <MenuItem Header="Open In New Window" Click="DataGridMenuItemOpenInNewWindow_Clicked"/>
+                                <MenuItem Header="Add">
+                                    <MenuItem Header="Custom" Click="AddCustomWave"/>
+                                    <MenuItem Header="From JSON File" Click="ReadFromJsonFile"/>
+                                </MenuItem>
+                                <MenuItem Header="Export JSON" Click="DataGridMenuItemExportJSON_Clicked"/>
+                                <MenuItem Header="View Values" Click="DataGridMenuItemViewValues_Clicked"/>
+                                <Separator/>
+                                <MenuItem Header="Remove" Click="DataGridMenuItemRemove_Clicked"/>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                        <!-- End DataGrid ContextMenu -->
 
-                </Grid>
-            </StackPanel>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Path=Name, Mode=OneWay}" Header="Plot Name"/>
+                            <DataGridTextColumn Binding="{Binding Path=PointCount, Mode=OneWay}" Header="Point Count"/>
+                            <DataGridTextColumn Binding="{Binding Path=SampleRate, Mode=OneWay}" Header="Sample Rate"/>
+                            <DataGridTextColumn Binding="{Binding Path=SamplePeriod, Mode=OneWay}" Header="Sample Period"/>
+                            <DataGridTextColumn Binding="{Binding Path=Frequency, Mode=OneWay}" Header="Frequency"/>
+                            <DataGridTextColumn Binding="{Binding Path=Phase, Mode=OneWay}" Header="Phase"/>
+                            <DataGridTextColumn Binding="{Binding Path=Amplitude, Mode=OneWay}" Header="Amplitude"/>
+                            <DataGridCheckBoxColumn Width="*" Binding="{Binding Path=Visible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Visible"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+                <!--End Plot Grid-->
+                    <materialDesign:PopupBox
+                        Grid.Row="1"
+                        Style="{StaticResource ResourceKey=MaterialDesignMultiFloatingActionPopupBox}"
+                        PlacementMode="LeftAndAlignBottomEdges"
+                        UnfurlOrientation="Horizontal"
+                        ToolTip="Add Waves"
+                        Margin="20"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom">
+                        <StackPanel Orientation="Horizontal">
+                            <Button
+                                ToolTip="Add Custom Wave"
+                                Click="AddCustomWave">
+                                <materialDesign:PackIcon Kind="SineWave" />
+                            </Button>
+                            <Button ToolTip="Add From JSON" Click="ReadFromJsonFile">
+                                <materialDesign:PackIcon Kind="CodeJson" />
+                            </Button>
+                        </StackPanel>
+                    </materialDesign:PopupBox>
+            </Grid>
         </Grid>
     </Border>
 </Window>

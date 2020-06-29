@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using MaterialDesignThemes.Wpf;
 using MathNet.Numerics;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -14,7 +15,6 @@ using static Signals.Utility;
 using Color = System.Drawing.Color;
 using Window = System.Windows.Window;
 
-#pragma warning disable CS0618 
 namespace Signals
 {
     /// <summary>
@@ -32,7 +32,7 @@ namespace Signals
         private MenuItem _line;
         private MenuItem _clearLines;
         private MenuItem _openWindow;
-        private MenuItem _savePNG;
+        private MenuItem _saveImage;
         private ContextMenu _plotMenu;
         private readonly ObservableCollection<PlotModel> _plots = new ObservableCollection<PlotModel>();
 
@@ -50,7 +50,7 @@ namespace Signals
             _plots = new ObservableCollection<PlotModel>();
             foreach (var plotModel in plots)
             {
-                var temp = new PlotModel { Plot = SinePlot.plt.PlotSignal(plotModel.Plot.ys, plotModel.Plot.sampleRate, label: plotModel.Name), Visible = true, Amplitude = plotModel.Amplitude, Frequency = plotModel.Frequency, Phase = plotModel.Phase };
+                var temp = new PlotModel { ParentPlot = SinePlot, Plot = SinePlot.plt.PlotSignal(plotModel.Plot.ys, plotModel.Plot.sampleRate, label: plotModel.Name), Visible = true, Amplitude = plotModel.Amplitude, Frequency = plotModel.Frequency, Phase = plotModel.Phase };
                 _plots.Add(temp);
             }
             InitializePlot(true);
@@ -60,7 +60,7 @@ namespace Signals
         {
             InitializeComponent();
             _plots = new ObservableCollection<PlotModel>();
-            var temp = new PlotModel { Plot = SinePlot.plt.PlotSignal(plotModel.Plot.ys, plotModel.Plot.sampleRate, label: plotModel.Name), Visible = true, Amplitude = plotModel.Amplitude, Frequency = plotModel.Frequency, Phase = plotModel.Phase };
+            var temp = new PlotModel { ParentPlot = SinePlot, Plot = SinePlot.plt.PlotSignal(plotModel.Plot.ys, plotModel.Plot.sampleRate, label: plotModel.Name), Visible = true, Amplitude = plotModel.Amplitude, Frequency = plotModel.Frequency, Phase = plotModel.Phase };
             _plots.Add(temp);
 
             InitializePlot(true);
@@ -85,11 +85,11 @@ namespace Signals
 
                 for (int i = 0; i < waveCount; i++)
                 {
-                    _plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(waveList[i].ys, sampleRate, label: $"Harmonic{i}"), Amplitude = waveList[i].amplitude, Frequency = waveList[i].frequency, Phase = waveList[i].phase });
+                    _plots.Add(new PlotModel { ParentPlot = SinePlot, Plot = SinePlot.plt.PlotSignal(waveList[i].ys, sampleRate, label: $"Harmonic{i}"), Amplitude = waveList[i].amplitude, Frequency = waveList[i].frequency, Phase = waveList[i].phase });
                 }
 
                 var combined = CombineSinusodial(waveList.Select(x => x.ys));
-                _plots.Add(new PlotModel { Plot = SinePlot.plt.PlotSignal(combined, sampleRate, label: "CombinedSignal") });
+                _plots.Add(new PlotModel { ParentPlot = SinePlot, Plot = SinePlot.plt.PlotSignal(combined, sampleRate, label: "CombinedSignal") });
             }
 
             #endregion
@@ -98,7 +98,7 @@ namespace Signals
             _line = new MenuItem();
             _clearLines = new MenuItem();
             _openWindow = new MenuItem();
-            _savePNG = new MenuItem();
+            _saveImage = new MenuItem();
 
             _plotMenu = new ContextMenu();
 
@@ -112,20 +112,20 @@ namespace Signals
             _line.Click += MenuItemSelect_Click;
             _clearLines.Click += MenuItemClearSelect_Click;
             _openWindow.Click += MenuItemOpenSelection_Click;
-            _savePNG.Click += MenuItemSavePNG_Click;
+            _saveImage.Click += SavePlotAsImage;
 
             SinePlot.plt.Title("Signals");
             SinePlot.plt.XLabel("Time (s)");
             SinePlot.plt.YLabel("Amplitude");
             _clearLines.Header = "Clear Selection";
             _openWindow.Header = "Open Selection in new window";
-            _savePNG.Header = "Save Image";
+            _saveImage.Header = "Save Image";
 
             _plotMenu.Items.Add(_line);
             _plotMenu.Items.Add(_openWindow);
             _plotMenu.Items.Add(_clearLines);
             _plotMenu.Items.Add(new Separator());
-            _plotMenu.Items.Add(_savePNG);
+            _plotMenu.Items.Add(_saveImage);
 
             _plottedLine1.visible = false;
             _plottedLine2.visible = false;
@@ -133,7 +133,7 @@ namespace Signals
 
             SinePlot.ContextMenu = _plotMenu;
             #endregion
-
+            //SinePlot.plt.Style(ScottPlot.Style.Light1);
             SinePlot.Render();
         }
 
@@ -154,7 +154,7 @@ namespace Signals
             SinePlot.Render();
         }
 
-        private void MenuItemSavePNG_Click(object sender, RoutedEventArgs e)
+        private void SavePlotAsImage(object sender, RoutedEventArgs e)
         {
             SaveFileDialog savefile = new SaveFileDialog
             {
@@ -194,7 +194,7 @@ namespace Signals
                     if (ys.Length > 0)
                     {
                         var temp = new PlottableSignal(ys, plot.sampleRate, plot.xOffset, plot.yOffset, plot.color, plot.lineWidth, plot.markerSize, plot.label, null, ys.Length - 1, LineStyle.Dash, useParallel: false);
-                        newCollection.Add(new PlotModel { Plot = temp, Visible = true, Amplitude = plotModel.Amplitude, Frequency = plotModel.Frequency, Phase = plotModel.Phase });
+                        newCollection.Add(new PlotModel { ParentPlot = SinePlot, Plot = temp, Visible = true, Amplitude = plotModel.Amplitude, Frequency = plotModel.Frequency, Phase = plotModel.Phase });
                     }
                 }
             }
@@ -321,14 +321,16 @@ namespace Signals
             dataViewWindow.Show();
         }
 
-        private void DataGridMenuItemAddCustom_Clicked(object sender, RoutedEventArgs e)
+        private void AddCustomWave(object sender, RoutedEventArgs e)
         {
             var addCustomWaveWindow = new AddWaveWindow();
 
             if (addCustomWaveWindow.ShowDialog() == true)
             {
-                _plots.Add(addCustomWaveWindow.ResultPlot);
-                SinePlot.plt.Add(addCustomWaveWindow.ResultPlot.Plot);
+                var resultPlot = addCustomWaveWindow.ResultPlot;
+                resultPlot.ParentPlot = SinePlot;
+                _plots.Add(resultPlot);
+                SinePlot.plt.Add(resultPlot.Plot);
             }
 
             SinePlot.Render();
@@ -368,7 +370,7 @@ namespace Signals
             }
 
         }
-        private void DataGridMenuItemReadFromFile_Clicked(object sender, RoutedEventArgs e)
+        private void ReadFromJsonFile(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
@@ -390,6 +392,7 @@ namespace Signals
 
                     _plots.Add(new PlotModel
                     {
+                        ParentPlot = SinePlot,
                         Amplitude = deserializedPlot.Amplitude,
                         Frequency = deserializedPlot.Frequency,
                         Phase = deserializedPlot.Phase,
@@ -407,6 +410,9 @@ namespace Signals
 
         #endregion
 
-
+        private void ExitProgram(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }

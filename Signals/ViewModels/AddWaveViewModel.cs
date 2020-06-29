@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Signals.ViewModels
@@ -49,19 +50,19 @@ namespace Signals.ViewModels
 
         public bool CanExecute(object parameter)
         {
-           
+
             return true;
         }
 
         public void Execute(object parameter)
         {
-            if(parameter is AddWaveModel model)
+            if (parameter is AddWaveModel model)
             {
                 Random random = new Random();
                 model.Frequency = random.Next(0, 100);
                 model.Amplitude = random.Next(0, 100);
                 model.PointCount = random.Next(100, 10000);
-                model.SampleRate= random.Next(100, 10000);
+                model.SampleRate = random.Next(100, 10000);
                 model.Phase = random.Next(0, 10);
             }
         }

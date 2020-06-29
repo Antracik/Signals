@@ -50,6 +50,7 @@ namespace Signals
             plottableScatter = FFTPlot.plt.PlotPoint(.0, .0);
             xs = DataGen.Consecutive(magYs.Length);
             FFTPlot.MouseMove += OnMouseMove_Plot;
+            FFTPlot.ContextMenu = null;
             FFTPlot.Render();
         }
 

@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Signals.Models
 {
-    public class PlotModel : INotifyPropertyChanged
+    public class PlotModel : BaseModel
     {
         public PlottableSignal Plot { get; set; }
 
@@ -35,11 +35,5 @@ namespace Signals.Models
         public double SampleRate => Plot.sampleRate;
         public double SamplePeriod => Plot.samplePeriod;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

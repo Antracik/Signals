@@ -15,7 +15,8 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow"
+        
         >
     <Grid>
         <Grid.RowDefinitions>
@@ -40,8 +41,8 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <TextBlock Margin="10,0,0,0" Text="Point Count:" Grid.Column="0" Grid.Row="0"></TextBlock>
-                    <TextBlock Margin="10,0,0,0" Text="Sample rate:" Grid.Column="0" Grid.Row="1"></TextBlock>
-                    <TextBlock Margin="10,0,0,0" Text="Sample Period:" Grid.Column="0" Grid.Row="2"></TextBlock>
+                    <TextBlock Margin="10,0,0,0" Text="Sample Rate:" Grid.Column="0" Grid.Row="1"></TextBlock>
+                    <TextBlock Margin="10,0,0,0" Text="Sample Period:" Grid.Column="0" Grid.Row="2" Height="14" VerticalAlignment="Bottom"></TextBlock>
 
                     <TextBlock Margin="3,0,0,0" Text="{Binding Path=PointCount, FallbackValue=Unspecified, TargetNullValue=Unspecified, Mode=OneTime}" Grid.Column="1" Grid.Row="0"></TextBlock>
                     <TextBlock Margin="3,0,0,0" Text="{Binding Path=SampleRate, FallbackValue=Unspecified, TargetNullValue=Unspecified, Mode=OneTime}" Grid.Column="1" Grid.Row="1"></TextBlock>

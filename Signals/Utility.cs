@@ -53,39 +53,6 @@ namespace Signals
             return models;
         }
 
-        public static IEnumerable<(double[] xs, double[] ys)> GenerateRandomScatterPoints(int pointCount, int sampleRate)
-        {
-            Random rand = new Random();
-            List<(double[] xs, double[] ys)> list = new List<(double[] xs, double[] ys)>();
-            for (int i = 0; i < 10; i++)
-            {
-                var xs = DataGen.Consecutive(pointCount);
-                var ys = Generate.Sinusoidal(pointCount, sampleRate, rand.Next(1, 20), rand.Next(1, 10), phase: rand.Next(1, 10));
-
-                list.Add((xs, ys));
-            }
-
-            return list;
-        }
-
-        public static double[] GenerateWaveForm(int pointCount, int sampleRate)
-        {
-            Random rand = new Random();
-
-            double[] ys = new double[pointCount];
-
-            for (int i = 0; i < 3; i++)
-            {
-                var tempYs = Generate.Sinusoidal(pointCount, sampleRate, rand.Next(1, 20), rand.Next(-20, 20), phase: rand.Next(0, 360));
-
-                for (int j = 0; j < tempYs.Length; j++)
-                {
-                    ys[j] += tempYs[j];
-                }
-            }
-
-            return ys;
-        }
 
         public static (double[] ys, int frequency, int amplitude, int phase) GenerateSinusoidal(int pointCount, int sampleRate)
         {
@@ -98,7 +65,7 @@ namespace Signals
             return (Generate.Sinusoidal(pointCount, sampleRate, frequency, amplitude, phase: phase), frequency, amplitude, phase);
         }
 
-        public static double[] CombineSinusodial(IEnumerable<double[]> sinusodials)
+        public static double[] CombineSinusoidal(IEnumerable<double[]> sinusodials)
         {
             if (!sinusodials.Any())
                 throw new ArgumentException($"Argument {nameof(sinusodials)} should not be empty");

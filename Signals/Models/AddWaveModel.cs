@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Signals.Models
 {
-    public class AddWaveModel : INotifyPropertyChanged
+    public class AddWaveModel : BaseModel
     {
         public WpfPlot ParentPlot { get; set; }
 
@@ -120,11 +120,6 @@ namespace Signals.Models
             ParentPlot.Render(true);
         }
 
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        
     }
 }

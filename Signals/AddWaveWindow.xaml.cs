@@ -96,6 +96,9 @@ namespace Signals
                 if (text.Length > 1)
                     text = text.TrimStart('0');
 
+                if (string.IsNullOrWhiteSpace(text))
+                    text = "0";
+
                 textBox.Text = text;
             }
         }

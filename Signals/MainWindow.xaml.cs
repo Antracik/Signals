@@ -23,7 +23,7 @@ namespace Signals
     public partial class MainWindow : Window
     {
         #region Private values
-        private const int pointCount = 500;
+        private const int pointCount = 1000;
         private const int sampleRate = 1000;
         private Point mousePosition;
         private PlottableVLine _plottedLine1;
@@ -88,7 +88,7 @@ namespace Signals
                     _plots.Add(new PlotModel { ParentPlot = SinePlot, Plot = SinePlot.plt.PlotSignal(waveList[i].ys, sampleRate, label: $"Harmonic{i}"), Amplitude = waveList[i].amplitude, Frequency = waveList[i].frequency, Phase = waveList[i].phase });
                 }
 
-                var combined = CombineSinusodial(waveList.Select(x => x.ys));
+                var combined = CombineSinusoidal(waveList.Select(x => x.ys));
                 _plots.Add(new PlotModel { ParentPlot = SinePlot, Plot = SinePlot.plt.PlotSignal(combined, sampleRate, label: "CombinedSignal") });
             }
 
@@ -133,7 +133,6 @@ namespace Signals
 
             SinePlot.ContextMenu = _plotMenu;
             #endregion
-            //SinePlot.plt.Style(ScottPlot.Style.Light1);
             SinePlot.Render();
         }
 
@@ -274,19 +273,6 @@ namespace Signals
             FFTWindow.Show();
         }
 
-        private void DataGridToggleWaveVisibility(object sender, RoutedEventArgs e)
-        {
-            var selectedItem = (PlotModel)PlotDataGrid.SelectedItem;
-            if (selectedItem != null)
-            {
-                var temp = SinePlot.plt.GetPlottables().FirstOrDefault(x => x == selectedItem.Plot);
-
-                if (temp != null)
-                    temp.visible ^= true;
-
-                SinePlot.Render();
-            }
-        }
 
         private void DataGridMenuItemOpenInNewWindow_Clicked(object sender, RoutedEventArgs e)
         {
@@ -334,7 +320,6 @@ namespace Signals
             }
 
             SinePlot.Render();
-            PlotDataGrid.UnselectAll();
         }
 
         private void DataGridMenuItemExportJSON_Clicked(object sender, RoutedEventArgs e)
@@ -386,7 +371,18 @@ namespace Signals
 
                     JSONPlotModel deserializedPlot = (JSONPlotModel)new JsonSerializer().Deserialize(file, typeof(JSONPlotModel));
 
-                    PlotDataGrid.UnselectAll();
+                    if (string.IsNullOrWhiteSpace(deserializedPlot.Name))
+                        deserializedPlot.Name = openFileDialog.SafeFileName.Substring(0, openFileDialog.SafeFileName.IndexOf('.'));
+
+
+                    if (deserializedPlot.Data == null)
+                        throw new ArgumentException();
+
+                    if (deserializedPlot.PointCount == 0)
+                        deserializedPlot.PointCount = deserializedPlot.Data.Length;
+
+                    if (deserializedPlot.SampleRate == 0)
+                        deserializedPlot.SampleRate = deserializedPlot.Data.Length;
 
                     var plot = SinePlot.plt.PlotSignal(deserializedPlot.Data, deserializedPlot.SampleRate, label: deserializedPlot.Name);
 
@@ -414,5 +410,6 @@ namespace Signals
         {
             Close();
         }
+
     }
 }

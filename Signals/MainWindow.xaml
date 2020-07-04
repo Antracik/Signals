@@ -35,19 +35,38 @@
             </Grid.ColumnDefinitions>
             <!--End Grid Column And Rows Definitions-->
 
-            <ToolBar Grid.Row="0" Background="{DynamicResource MaterialDesignPaper}">
-                <Menu>
+            <DockPanel Grid.Row="0" Background="{DynamicResource MaterialDesignPaper}">
+                <Menu DockPanel.Dock="Top" IsMainMenu="True">
                     <MenuItem Header="File">
                         <MenuItem Header="Add">
-                            <MenuItem Header="Custom Wave" Click="AddCustomWave"/>
-                            <MenuItem Header="From JSON" Click="ReadFromJsonFile"/>
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="Plus" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="Custom Wave" Click="AddCustomWave">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="SineWave" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="From JSON" Click="ReadFromJsonFile">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="CodeJson" />
+                                </MenuItem.Icon>
+                            </MenuItem>
                         </MenuItem>
-                        <MenuItem Header="Save as Image" Click="SavePlotAsImage"/>
+                        <MenuItem Header="Save as Image" Click="SavePlotAsImage">
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="FileImage" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <Separator/>
-                        <MenuItem Header="Close" Click="ExitProgram"/>
+                        <MenuItem Header="Close" Click="ExitProgram">
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="ExitRun" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                     </MenuItem>
                 </Menu>
-            </ToolBar>
+            </DockPanel>
 
             <!-- Main Plot -->
             <ScottPlot:WpfPlot Grid.Row="1" Grid.Column="0" Name="SinePlot" />
@@ -63,8 +82,7 @@
                 <!-- End Grid Row Definitions -->
 
                 <!-- Plots Grid -->
-                <StackPanel Margin="0,10,0,0" Grid.Row="0">
-                    <DataGrid Name="PlotDataGrid" 
+                    <DataGrid Margin="0,10,0,0" Grid.Row="0" Name="PlotDataGrid" VerticalScrollBarVisibility="Auto"
                                   AutoGenerateColumns="False"
                                   CanUserAddRows="False"
                                   CanUserDeleteRows="False"
@@ -107,9 +125,8 @@
                             <DataGridCheckBoxColumn Width="*" Binding="{Binding Path=Visible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Visible"/>
                         </DataGrid.Columns>
                     </DataGrid>
-                </StackPanel>
                 <!--End Plot Grid-->
-                    <materialDesign:PopupBox
+                <materialDesign:PopupBox
                         Grid.Row="1"
                         Style="{StaticResource ResourceKey=MaterialDesignMultiFloatingActionPopupBox}"
                         PlacementMode="LeftAndAlignBottomEdges"
@@ -118,17 +135,17 @@
                         Margin="20"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Bottom">
-                        <StackPanel Orientation="Horizontal">
-                            <Button
+                    <StackPanel Orientation="Horizontal">
+                        <Button
                                 ToolTip="Add Custom Wave"
                                 Click="AddCustomWave">
-                                <materialDesign:PackIcon Kind="SineWave" />
-                            </Button>
-                            <Button ToolTip="Add From JSON" Click="ReadFromJsonFile">
-                                <materialDesign:PackIcon Kind="CodeJson" />
-                            </Button>
-                        </StackPanel>
-                    </materialDesign:PopupBox>
+                            <materialDesign:PackIcon Kind="SineWave" />
+                        </Button>
+                        <Button ToolTip="Add From JSON" Click="ReadFromJsonFile">
+                            <materialDesign:PackIcon Kind="CodeJson" />
+                        </Button>
+                    </StackPanel>
+                </materialDesign:PopupBox>
             </Grid>
         </Grid>
     </Border>

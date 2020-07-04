@@ -13,9 +13,6 @@ namespace Signals.Models
         public int? Phase { get; set; }
         public int? Amplitude { get; set; }
         public int PointCount { get; set; }
-        
-        [DefaultValue(1)]
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public double SampleRate { get; set; }
         public double SamplePeriod { get; set; }
         public double[] Data { get; set; }

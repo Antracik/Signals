@@ -1,10 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-
-namespace Signals.Models
+﻿namespace Signals.Models
 {
     public class JSONPlotModel
     {

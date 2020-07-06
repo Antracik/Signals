@@ -15,7 +15,7 @@
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
-        FontFamily="{DynamicResource MaterialDesignFont}" WindowStyle="None" ShowInTaskbar="False"
+        FontFamily="{DynamicResource MaterialDesignFont}" WindowStyle="None"
         >
     <Grid>
         <Grid.RowDefinitions>
@@ -51,7 +51,7 @@
             <TextBlock Margin="3" Grid.Column="2" Grid.Row="2" Text="Phase:" />
             <TextBlock Margin="3" Grid.Column="2" Grid.Row="3" Text="Amplitude:" />
 
-            <TextBox Margin="3" Grid.Column="3" Grid.Row="1" DataObject.Pasting="TextBoxPasting" TextChanged="TextBoxTextChanged" PreviewTextInput="TextBoxPreviewTextInput" TextAlignment="Right" MaxLength="7" Text="{Binding Path=WaveModel.Frequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"     />
+            <TextBox Margin="3" Grid.Column="3" Grid.Row="1" DataObject.Pasting="TextBoxPasting" TextChanged="TextBoxTextChanged" PreviewTextInput="TextBoxPreviewTextInput" TextAlignment="Right" MaxLength="5" Text="{Binding Path=WaveModel.Frequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"     />
             <TextBox Margin="3" Grid.Column="3" Grid.Row="2" DataObject.Pasting="TextBoxPasting" TextChanged="TextBoxTextChanged" PreviewTextInput="TextBoxPreviewTextInput" TextAlignment="Right" MaxLength="3" Text="{Binding Path=WaveModel.Phase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"     />
             <TextBox Margin="3" Grid.Column="3" Grid.Row="3" DataObject.Pasting="TextBoxPasting" TextChanged="TextBoxTextChanged" PreviewTextInput="TextBoxPreviewTextInput" TextAlignment="Right" MaxLength="3" Text="{Binding Path=WaveModel.Amplitude, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 

@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using MaterialDesignThemes.Wpf;
 using MathNet.Numerics;
 using Microsoft.Win32;
 using Newtonsoft.Json;

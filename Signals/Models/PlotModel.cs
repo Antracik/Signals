@@ -1,5 +1,4 @@
 ﻿using ScottPlot;
-using System.ComponentModel;
 
 namespace Signals.Models
 {

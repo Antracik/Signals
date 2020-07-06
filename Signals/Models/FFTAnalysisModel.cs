@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Signals.Models
+﻿namespace Signals.Models
 {
     public class FFTAnalysisModel
     {
